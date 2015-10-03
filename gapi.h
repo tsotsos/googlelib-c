@@ -34,7 +34,8 @@ char * ReadFile(char * filename);
 char * getValue(char * string, char * value);
 /* getSettings definition */
 config getSettings(char *filename);
-void setSettings(char * filename, char *search_string , char *replace_string );
+/* SetSettings definition*/
+void setSetting(char * filename, char *search_string , char *replace_string );
 /* Stores to an 'array' of Json Struct the json response from google  */
 Json * GoogleResponse(char * response);
 #endif // GAPI_H_

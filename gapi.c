@@ -144,9 +144,8 @@ config getSettings(char *filename)
 
    return settings;
 }
-/* setSettings saves to desired file the settings
- * TODO: Needs config struct to be implement istead of search_string */
-void setSettings(char * filename, char *search_string , char *replace_string )
+/* setSettings saves to desired file the settings*/
+void setSetting(char * filename, char *search_string , char *replace_string )
 {
    FILE *input = fopen(filename, "r");
    FILE *output = fopen("tmp.txt", "w");
