@@ -33,9 +33,9 @@ int tcpConnect (char * server_addr, int server_port)
    } else {
       server.sin_family = AF_INET;
       server.sin_port = htons (server_port);
-      server.sin_addr = *((struct in_addr *) host->h_addr);
-      bzero (&(server.sin_zero), 8);
-
+      server.sin_addr = *((struct in_addr *) host->h_addr_list[0]);
+      // NOT C11 : bzero (&(server.sin_zero), 8);
+      memset (&(server.sin_zero),0, 8);
       error = connect (handle, (struct sockaddr *) &server,
                        sizeof (struct sockaddr));
       if (error == -1) {
@@ -131,23 +131,28 @@ void sslWrite (connection *c, char *text)
 
 char * GoogleAuthLink ( config settings )
 {
-   char * link=  malloc(2048+1);
+   char * link=  malloc(2048);
    sprintf(link,"https://%s%s?redirect_uri=%s&response_type=code&client_id=%s&scope=profile",settings.authhost,settings.authpage,settings.redirect_uri,settings.client_id);
    return link;
 }
 char * GoogleAuthToken ( char * code, config settings)
 {
    connection *c;
-
    char *response;
-   char *post = malloc(8192+1);
-   char *postvars = malloc (2048+1);
-   sprintf(postvars,"code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=authorization_code",code,settings.client_id,settings.client_secret,settings.redirect_uri);
-   sprintf(post,"POST %s HTTP/1.1\r\n"
-           "Host: %s\r\n"
-           "Content-type: application/x-www-form-urlencoded\r\n"
-           "Content-length: %zu\r\n\r\n"
-           "%s\r\n\r\n", settings.tokenpage,settings.tokenhost,strlen(postvars),postvars);
+   char *postvars = NULL;
+   char *post = NULL;
+   const char * postvars_format = "code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=authorization_code";
+   const char * post_format = "POST %s HTTP/1.1\r\n"
+                              "Host: %s\r\n"
+                              "Content-type: application/x-www-form-urlencoded\r\n"
+                              "Content-length: %zu\r\n\r\n"
+                              "%s\r\n\r\n";
+   size_t postvars_length = snprintf(NULL,0,postvars_format,code,settings.client_id,settings.client_secret,settings.redirect_uri) + 1;
+   postvars = malloc(postvars_length * sizeof(char));
+   snprintf(postvars,postvars_length,postvars_format,code,settings.client_id,settings.client_secret,settings.redirect_uri);
+   size_t post_length = snprintf(NULL,0,post_format, settings.tokenpage,settings.tokenhost,strlen(postvars),postvars) + 1;
+   post = malloc(post_length * sizeof(char));
+   snprintf(post,post_length,post_format, settings.tokenpage,settings.tokenhost,strlen(postvars),postvars);
    c = sslConnect (settings.tokenhost,443);
    sslWrite (c, post);
    response = sslRead (c);
@@ -156,3 +161,5 @@ char * GoogleAuthToken ( char * code, config settings)
    free(postvars);
    return response;
 }
+
+

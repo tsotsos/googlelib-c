@@ -21,7 +21,7 @@
 #ifndef GAPI_H_
 #define GAPI_H_
 #include "googlelib.h"//for demo only, this should be <GoogleLib/googlelib.h>
-
+#include <stdio.h>
 /* Concatenate 2 char* */
 char *concat(char *s1, char *s2);
 /* Removes spaces from char* */

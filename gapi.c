@@ -60,6 +60,7 @@ char * find_between(char *response,char *first, char *last)
       free(target);
       return NULL;
 }
+
 /* Readfile definition */
 char * ReadFile(char * filename)
 {
@@ -176,6 +177,7 @@ void setSetting(char * filename, char *search_string , char *replace_string )
 Json * GoogleResponse(char * response)
 {
    Json *json;
+  // char *http_code = find_between(response,"HTTP/1.1 ","\r");
    char *content_type = find_between(response,"Content-Type: ",";");
    // Checks for content type = "application/json"
    int content_type_cmp = strcmp(content_type,"application/json");
