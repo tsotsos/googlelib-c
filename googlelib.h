@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Georgios Tsotsos <tsotsos@linux.com>
+ * Copyright 2015 Georgios Tsotsos
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,48 +33,55 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-/*struct to define SSL connection */
+/**
+ * struct connection - Holding connection info
+ * @socket: stores socket
+ * @sslHandle: stores SSL
+ * @sslContext: SSL_CTX struct
+ *
+ * Holding connection info
+ */
 typedef struct {
-   int socket;
-   SSL *sslHandle;
-   SSL_CTX *sslContext;
+  int socket;
+  SSL *sslHandle;
+  SSL_CTX *sslContext;
 } connection;
-/*struct for settings */
+/**
+ * struct config - Holding settings
+ * @authhost: google server for authentication (accounts.google.com)
+ * @authpage: authenticatiion page (/o/oauth2/auth)
+ * @tokenhost: token server (googleapis.com)
+ * @tokenpage: token page
+ * @client_id: Google application client id
+ * @client_secret: Google application client secret
+ * @redirect_uri: Give redirect uri
+ * @accesstoken: returned access token
+ *
+ * Holding settings info.
+ */
 typedef struct {
-   char * authhost;
-   char * authpage;
-   char * tokenhost;
-   char * tokenpage;
-   char * client_id;
-   char * client_secret;
-   char * redirect_uri;
-   char * accesstoken;
+  char * authhost;
+  char * authpage;
+  char * tokenhost;
+  char * tokenpage;
+  char * client_id;
+  char * client_secret;
+  char * redirect_uri;
+  char * accesstoken;
 } config;
-/* struct for json response */
-typedef struct {
-   char * name;
-   char * value;
-} Json;
 
-/* TCP Connection */
 int tcpConnect (char * server_addr, int server_port);
 
-/* SSL Connection */
 connection * sslConnect (char * server_addr,int server_port);
 
-/* SSL Disconnect */
 void sslDisconnect (connection *c);
 
-/* SSL Read response */
 char * sslRead (connection *c);
 
-/* SSL Write conncetion */
 void sslWrite (connection * c, char *text);
 
-/* Returns the Google oAuth2 link for verification code */
-char * GoogleAuthLink ( config settings );
+char * GoogleAuthLink ( config settings, char * scope );
 
-/* Exchange verification code for access token */
 char * GoogleAuthToken ( char * code, config settings);
 
 #endif // GOOGLELIB_H_
