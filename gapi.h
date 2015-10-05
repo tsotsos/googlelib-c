@@ -112,12 +112,12 @@ config getSettings(char *filename);
 /**
  * @brief Saves settings to file
  * @param filename:  Config filename
- * @param search_string:  name of value needs to renew
- * @param replace_string:  new value
+ * @param name: Name of value to add o replace
+ * @param value:  The value
  *
  * Saves/replace the wanted value by its name (preferable to config file)
  **/
-void setSetting(char * filename, char *search_string , char *replace_string );
+void setSetting(char * filename, char *name , char *value );
 
 /**
  * @brief Handles response from google api.
