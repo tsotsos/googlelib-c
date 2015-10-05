@@ -162,6 +162,7 @@ void setSetting(char * filename, char *search_string , char *replace_string )
   FILE *output = fopen("tmp.txt", "w");
   char buffer[512];
   char *pos = NULL;
+  int controller = 0;
   while (fgets(buffer, sizeof(buffer), input) != NULL) {
     pos = strstr(buffer, search_string);
     if (pos != NULL) {
@@ -174,11 +175,11 @@ void setSetting(char * filename, char *search_string , char *replace_string )
              1 + strlen(buffer) - ((pos - buffer) + strlen(search_string)));
       fputs(temp, output);
       free(temp);
+      controller = 1;
     } else
-      fputs(buffer, output);
-
+        fputs(buffer, output);
   }
-  if ( ( (fgets(buffer, sizeof(buffer), input) == NULL) || (pos == NULL) ) ) {
+  if ( controller == 1 ) {
     const char * format = "%s=\"%s\";\n";
     char * newvar = NULL;
     size_t flen = snprintf(NULL,0,format,search_string,replace_string);
@@ -212,6 +213,9 @@ Json * GoogleResponse(char * response)
       if (nextLine) *nextLine = '\0';
       char * key = find_between(curLine,"\"","\":");
       char * val = find_between(curLine,": \"","\"");
+      if (val == NULL) // check for integer
+        val = find_between(curLine,": ",",");
+      printf("key=%s, val=%s\n",key,val);
       if ( ((key != NULL) && (val !=NULL) ) ) {
         if (i==0)
           json = malloc(1 * sizeof(Json));
@@ -219,17 +223,15 @@ Json * GoogleResponse(char * response)
           json = realloc (json, ((i + 1) * sizeof(Json)));
         json[i].name = key;
         json[i].value = val;
+        json[0].length = i; //'array' size storing
         i++;
       }
       if (nextLine) *nextLine = '\n';
       curLine = nextLine ? (nextLine+1) : NULL;
     }
-    return json;
-  } else {
+  } else
     json = 0;
-    return json;
-  }
-
+  return json;
 }
 
 
