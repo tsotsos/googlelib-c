@@ -1,15 +1,19 @@
-## **GoogleLib for C** ##
-This is try for building google api library for C.
-This repository is its very first steps. I need this library
-for building a Google Drive application for linux (and most
-unixoid systems).
+Googlelib for c (googlelib-c)
+===================
+This project intends to help other programmers use [**Google API**](https://developers.google.com/google-apps/) in their programs.  There was not any library for this written in C.  Googlelib-c helps connect and handle all Google Apis easily, so other applications can be written to integrate features from Google (eg. Google Drive etc.). A basic goal is to be able to compile in most systems. 
 
-**The initial goals are:**
+**Some initial goals are:**
 
-* Complete RESTApi calls
-* Simple error handling for JSON responses (by Google) (gapi)
+* Complete Api calls
+* Error Handling for Json Response ( returned by GoogleResponse() )
 * Portability for almost any Linux box
 
 **Dependencies**
 
 * OpenSSL library
+
+
+Contribute
+----------
+
+GoogleLib-c is written (and will continue) according with POSIX and C11 standards. Linux Coding style and Comments has been adapted. So if you decide to contribute please use them. 
