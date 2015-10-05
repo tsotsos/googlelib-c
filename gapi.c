@@ -161,8 +161,9 @@ void setSetting(char * filename, char *search_string , char *replace_string )
   FILE *input = fopen(filename, "r");
   FILE *output = fopen("tmp.txt", "w");
   char buffer[512];
+  char *pos = NULL;
   while (fgets(buffer, sizeof(buffer), input) != NULL) {
-    char *pos = strstr(buffer, search_string);
+    pos = strstr(buffer, search_string);
     if (pos != NULL) {
       char *temp = calloc(
                      strlen(buffer) - strlen(search_string) + strlen(replace_string) + 1, 1);
@@ -172,16 +173,28 @@ void setSetting(char * filename, char *search_string , char *replace_string )
              pos + strlen(search_string),
              1 + strlen(buffer) - ((pos - buffer) + strlen(search_string)));
       fputs(temp, output);
-
       free(temp);
     } else
       fputs(buffer, output);
+
+  }
+  if ( ( (fgets(buffer, sizeof(buffer), input) == NULL) || (pos == NULL) ) ) {
+    const char * format = "%s=\"%s\";\n";
+    char * newvar = NULL;
+    size_t flen = snprintf(NULL,0,format,search_string,replace_string);
+    newvar = malloc(flen+1);
+    snprintf(newvar,flen,format,search_string,replace_string);
+    char *temp = calloc(
+                   strlen(buffer) + flen+1, 1);
+    memcpy(temp, newvar, flen);
+    fputs(temp, output);
   }
   fclose(output);
   fclose(input);
 
   /* Rename the temporary file to the original file */
   rename("tmp.txt", filename);
+}
 }
 
 Json * GoogleResponse(char * response)
