@@ -115,8 +115,6 @@ void sslDisconnect (connection *c);
  * controled by last 5 characters.
  * They should be : 0-CR-LF-CR-LF.
  *
- * \todo see if there are any exceptions and implement a
- * timeout failsafe.
  **/
 char * sslRead (connection *c);
 
