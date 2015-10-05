@@ -179,7 +179,7 @@ void setSetting(char * filename, char *search_string , char *replace_string )
     } else
         fputs(buffer, output);
   }
-  if ( controller == 1 ) {
+  if ( controller ==1  ) {
     const char * format = "%s=\"%s\";\n";
     char * newvar = NULL;
     size_t flen = snprintf(NULL,0,format,search_string,replace_string);
@@ -233,5 +233,6 @@ Json * GoogleResponse(char * response)
     json = 0;
   return json;
 }
+
 
 
