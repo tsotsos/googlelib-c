@@ -58,14 +58,14 @@ typedef struct {
 } connection;
 /**
  * @brief Holding settings
- * @param authhost: google server for authentication (accounts.google.com)
- * @param authpage: authenticatiion page (/o/oauth2/auth)
- * @param tokenhost: token server (googleapis.com)
- * @param tokenpage: token page
+ * @param authhost: Google server for authentication (accounts.google.com)
+ * @param authpage: Authenticatiion page (/o/oauth2/auth)
+ * @param tokenhost: Token server (googleapis.com)
+ * @param tokenpage: Token page
  * @param client_id: Google application client id
  * @param client_secret: Google application client secret
  * @param redirect_uri: Give redirect uri
- * @param accesstoken: returned access token
+ * @param refresh_token: Access token
  *
  * Holding settings info.
  */
@@ -77,7 +77,7 @@ typedef struct {
   char * client_id;
   char * client_secret;
   char * redirect_uri;
-  char * accesstoken;
+  char * refresh_token;
 } config;
 /**
  * @brief Establishes a tcp connection.
