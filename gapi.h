@@ -37,13 +37,14 @@
  * This struct is holding name/value type of Json
  * response from google.
  * 
- * @param name: stores socket
- * @param value: stores SSL
+ * @param name: Name of response
+ * @param value: Value of response
  *
  */
 typedef struct {
   char * name;
   char * value;
+  size_t length;
 } Json;
 
 /**
