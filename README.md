@@ -1,6 +1,6 @@
 Googlelib for c (googlelib-c)
 ===================
-This project intends to help other programmers use [**Google API**](https://developers.google.com/google-apps/) in their programs.  There was not any library for this written in C.  Googlelib-c helps connect and handle all Google Apis easily, so other applications can be written to integrate features from Google (eg. Google Drive etc.). A basic goal is to be able to compile in most systems. 
+This project intends to help other programmers use [**Google API**](https://developers.google.com/google-apps/) in their programs.  There was not any library for this written in C.  Googlelib-c helps connect and handle all Google Apis easily, so other applications can be written to integrate features from Google (eg. Google Drive etc.). A basic goal is to be able to compile on most systems. 
 
 **Some initial goals are:**
 
