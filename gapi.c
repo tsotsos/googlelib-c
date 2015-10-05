@@ -195,7 +195,6 @@ void setSetting(char * filename, char *search_string , char *replace_string )
   /* Rename the temporary file to the original file */
   rename("tmp.txt", filename);
 }
-}
 
 Json * GoogleResponse(char * response)
 {
