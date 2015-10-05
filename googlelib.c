@@ -115,10 +115,10 @@ char *sslRead (connection *c)
   if (c) {
     while ((received = SSL_read (c->sslHandle, buffer, readSize))) {
       if (!rc)
-        rc = malloc (readSize * sizeof (char*) + 1);
+        rc = malloc (readSize + 1);
       else
         rc = realloc (rc, (count + 1) *
-                      readSize * sizeof (char*) + 1);
+                      readSize + 1);
 
       buffer[received] = '\0';
       if (received > 0)
@@ -165,12 +165,12 @@ char * GoogleAuthToken ( char * code, config settings)
                              "%s\r\n\r\n";
   size_t postvars_length = snprintf(NULL,0,postvars_format,code,
                                     settings.client_id,settings.client_secret,settings.redirect_uri) + 1;
-  postvars = malloc(postvars_length * sizeof(char));
+  postvars = malloc(postvars_length);
   snprintf(postvars,postvars_length,postvars_format,code,settings.client_id,
            settings.client_secret,settings.redirect_uri);
   size_t post_length = snprintf(NULL,0,post_format, settings.tokenpage,
                                 settings.tokenhost,strlen(postvars),postvars) + 1;
-  post = malloc(post_length * sizeof(char));
+  post = malloc(post_length);
   snprintf(post,post_length,post_format, settings.tokenpage,settings.tokenhost,
            strlen(postvars),postvars);
   c = sslConnect (settings.tokenhost,443);
