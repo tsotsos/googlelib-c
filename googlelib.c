@@ -1,3 +1,13 @@
+/** @file googlelib.c
+ *  @brief Code for functions make requests to google api
+ *
+ *  This file contains source that is responsible for making
+ *  any connection to Google Api. All connections are made by
+ *  using sockets and OpenSSL, following Google Api regulations.
+ *
+ *  @author Georgios Tsotsos
+ *  @bug Not any known bugs.
+ */
 /*
  * Copyright 2015 Georgios Tsotsos
  *
@@ -19,13 +29,7 @@
  *
  */
 #include "googlelib.h"
-/**
- * tcpConnect - Establishes a tcp connection.
- * @server_addr: Server address
- * @server_port: Server port
- *
- * Establishes a TCP connection.
- **/
+
 int tcpConnect (char * server_addr, int server_port)
 {
   int error, handle;
@@ -53,14 +57,7 @@ int tcpConnect (char * server_addr, int server_port)
 
   return handle;
 }
-/**
- * sslConnect - Establishes a connection using SSL layer
- * @server_addr: Server address
- * @server_port: Server port
- *
- * Establishes a connection using SSL layer and handles
- * connection errors.
- **/
+
 connection *sslConnect (char * server_addr,int server_port)
 {
   connection *c;
@@ -94,12 +91,7 @@ connection *sslConnect (char * server_addr,int server_port)
 
   return c;
 }
-/**
- * sslDisconnect - Stops connection
- * @c: connection struct
- *
- * Closes socket and free the SSL connection.
- **/
+
 void sslDisconnect (connection *c)
 {
   if (c->socket)
@@ -113,18 +105,7 @@ void sslDisconnect (connection *c)
 
   free (c);
 }
-/**
- * sslRead - Wrapper for SSL_read
- * @c: connection struct
- *
- * Utilize SSL_read to receive chunked encoding connections
- * until the expected response is back. This mechanism
- * controled by last 5 characters.
- * They should be : 0-CR-LF-CR-LF.
- *
- * TODO: see if there are any exceptions and implement a
- * timeoute failsafe.
- **/
+
 char *sslRead (connection *c)
 {
   const int readSize = 1024;
@@ -153,26 +134,12 @@ char *sslRead (connection *c)
   return rc;
 }
 
-/**
- * sslWrite - Wrapper for SSL_write
- * @c: connection struct
- * @text: text to send
- *
- * Simplify SSL_write if the (struct) connection exists
- **/
 void sslWrite (connection *c, char *text)
 {
   if (c)
     SSL_write (c->sslHandle, text, strlen (text));
 }
-/**
- * GoogleAuthLink - Formats a string with link for google authorization
- * @settings: config struct which icludes settings
- * @scope: char with scopes from google api.
- *
- * Use this function to force user authorize your application for scope
- * see at : https://developers.google.com/+/web/api/rest/oauth
- **/
+
 char * GoogleAuthLink ( config settings, char * scope )
 {
   char * link=  malloc(2048);
@@ -182,16 +149,7 @@ char * GoogleAuthLink ( config settings, char * scope )
           scope);
   return link;
 }
-/**
- * GoogleAuthToken - Sends a POST request to exchange
- * authentication code with accsess token
- * @code: string with access code from user
- * @settings: config struct which icludes settings
- *
- * This function returns a full HTTP response. Almost every time this
- * response is in json format. There is a function for handling the Json
- * string * at gapi.h.
- **/
+
 char * GoogleAuthToken ( char * code, config settings)
 {
   connection *c;
