@@ -156,35 +156,36 @@ config getSettings(char *filename)
   return settings;
 }
 
-void setSetting(char * filename, char *search_string , char *replace_string )
+void setSetting(char * filename, char *name , char *value )
 {
   FILE *input = fopen(filename, "r");
   FILE *output = fopen("tmp.txt", "w");
   char buffer[512];
-  char *pos = NULL;
   int controller = 0;
   while (fgets(buffer, sizeof(buffer), input) != NULL) {
-    pos = strstr(buffer, search_string);
+    char *pos = strstr(buffer, name);
     if (pos != NULL) {
-      char *temp = calloc(
-                     strlen(buffer) - strlen(search_string) + strlen(replace_string) + 1, 1);
+      const char * format = "%s=\"%s\"; ";
+      char * newvar = NULL;
+      size_t flen = snprintf(NULL,0,format,name,value);
+      newvar = malloc(flen+1);
+      snprintf(newvar,flen,format,name,value);
+      printf("\n\n\n %s",newvar);
+      char *temp = calloc(strlen(buffer) - strlen(name) + flen + 1, 1);
       memcpy(temp, buffer, pos - buffer);
-      memcpy(temp + (pos - buffer), replace_string, strlen(replace_string));
-      memcpy(temp + (pos - buffer) + strlen(replace_string),
-             pos + strlen(search_string),
-             1 + strlen(buffer) - ((pos - buffer) + strlen(search_string)));
+      memcpy(temp + (pos - buffer), newvar, flen);
       fputs(temp, output);
       free(temp);
       controller = 1;
     } else
-        fputs(buffer, output);
+      fputs(buffer, output);
   }
-  if ( controller ==1  ) {
+  if ( controller != 1  ) {
     const char * format = "%s=\"%s\";\n";
     char * newvar = NULL;
-    size_t flen = snprintf(NULL,0,format,search_string,replace_string);
+    size_t flen = snprintf(NULL,0,format,name,value);
     newvar = malloc(flen+1);
-    snprintf(newvar,flen,format,search_string,replace_string);
+    snprintf(newvar,flen,format,name,value);
     char *temp = calloc(
                    strlen(buffer) + flen+1, 1);
     memcpy(temp, newvar, flen);
@@ -196,6 +197,7 @@ void setSetting(char * filename, char *search_string , char *replace_string )
   /* Rename the temporary file to the original file */
   rename("tmp.txt", filename);
 }
+
 
 Json * GoogleResponse(char * response)
 {
