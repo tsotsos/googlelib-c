@@ -43,7 +43,8 @@ char * trim(char *input)
 {
   int i,j;
   char *output=input;
-  for (i = 0, j = 0; i<strlen(input); i++,j++) {
+  int len = strlen(input);
+  for (i = 0, j = 0; i < len; i++,j++) {
     if (input[i]!=' ')
       output[j]=input[i];
     else
@@ -232,7 +233,7 @@ void setSetting(char * filename, char *search_string , char *replace_string )
  **/
 Json * GoogleResponse(char * response)
 {
-  Json *json;
+  Json *json=0;
   // char *http_code = find_between(response,"HTTP/1.1 ","\r");
   char *content_type = find_between(response,"Content-Type: ",";");
   // Checks for content type = "application/json"
