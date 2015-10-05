@@ -115,7 +115,6 @@ config getSettings(char *filename);
  * @param replace_string:  new value
  *
  * Saves/replace the wanted value by its name (preferable to config file)
- * TODO: implement a way to save value if there is not.
  **/
 void setSetting(char * filename, char *search_string , char *replace_string );
 
