@@ -246,3 +246,34 @@ char * GoogleAuthToken ( char * code, config settings)
   free(postvars);
   return response;
 }
+char * GoogleAuthRefreshToken ( config settings)
+{
+  connection *c;
+  char *response;
+  char *postvars = NULL;
+  char *post = NULL;
+  const char * postvars_format =
+    "refresh_token=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=refresh_token";
+  const char * post_format = "POST %s HTTP/1.1\r\n"
+                             "Host: %s\r\n"
+                             "Content-type: application/x-www-form-urlencoded\r\n"
+                             "Content-length: %zu\r\n\r\n"
+                             "%s\r\n\r\n";
+  size_t postvars_length = snprintf(NULL,0,postvars_format,settings.refresh_token,
+                                    settings.client_id,settings.client_secret,settings.redirect_uri) + 1;
+  postvars = malloc(postvars_length);
+  snprintf(postvars,postvars_length,postvars_format,settings.refresh_token,settings.client_id,
+           settings.client_secret,settings.redirect_uri);
+  size_t post_length = snprintf(NULL,0,post_format, settings.tokenpage,
+                                settings.tokenhost,strlen(postvars),postvars) + 1;
+  post = malloc(post_length);
+  snprintf(post,post_length,post_format, settings.tokenpage,settings.tokenhost,
+           strlen(postvars),postvars);
+  c = sslConnect (settings.tokenhost,443);
+  sslWrite (c, post);
+  response = sslRead (c);
+  sslDisconnect (c);
+  free(post);
+  free(postvars);
+  return response;
+}
