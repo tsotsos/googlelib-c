@@ -107,6 +107,33 @@ connection * sslConnect (char * server_addr,int server_port);
 void sslDisconnect (connection *c);
 
 /**
+ * @brief Error handling for SSL-layer
+ * @param ssl_error: SSL error cathced by connection
+ *
+ * @return Message for SSL error.
+ *
+ **/
+char *sslError (int32_t ssl_error);
+
+/**
+ * @brief HTTP status code corresponding message
+ * @param code: Status code
+ *
+ * @return Proper message for HTTP status code.
+ *
+ **/
+char * http_status_messages (int code);
+
+/**
+ * @brief Converts status line string to integer
+ * @param status_line: Line with status message
+ * 
+ * @return HTTP status code Int.
+ *
+ **/
+int getIntCode (char * status_line);
+
+/**
  * @brief Wrapper for SSL_read
  * @param c: connection struct
  *
@@ -150,5 +177,6 @@ char * GoogleAuthLink ( config settings, char * scope );
  **/
 char * GoogleAuthToken ( char * code, config settings);
 
+char * GoogleDrive ( char * token );
 #endif // GOOGLELIB_H_
 
