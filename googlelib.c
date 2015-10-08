@@ -132,8 +132,9 @@ http_status HttpStatus (char *buffer)
   char * nextLine = strchr(buffer, '\n');
   char * status_line = NULL;
   status_line = ( char * )malloc( nextLine - buffer + 1 );
-  memcpy( status_line, buffer, nextLine - buffer );
   status_line[nextLine - buffer] = '\0';
+  memcpy( status_line, buffer, (nextLine - buffer));
+  printf("\n\n\n\n\n\nStatus line:%s\n\n\n\n\n\n\n\n",status_line);
   char *a = strstr(status_line, "HTTP/1.0");
   char *b = strstr (status_line , "HTTP/1.1");
   if ( ( a != NULL ) ) {
@@ -166,14 +167,17 @@ char *sslRead (connection *c)
     while ((received = SSL_read (c->sslHandle, buffer, readSize))) {
       buffer[received] = '\0';
       ssl_error = SSL_get_error (c->sslHandle, received);
+      printf("\n\n\n COUNT %d\n\n",count);
       if (ssl_error !=0) {
         rc = sslError(ssl_error);
         break;
       }
-      status = HttpStatus(buffer);
-      if ( ( (count == 0) && (status.code !=200) ) ) {
-        rc =status.message;
-        break;
+      if ( (count == 0) ){
+        status = HttpStatus(buffer);
+        if ( (status.code !=200) ) {
+          rc =status.message;
+          break;
+        }
       }
       if (!rc)
         rc = malloc (readSize + 1);
