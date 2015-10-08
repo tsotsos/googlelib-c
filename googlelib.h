@@ -45,9 +45,21 @@
 
 /**
  * @brief Holding connection info
- * @param socket stores socket
- * @param sslHandle stores SSL
- * @param sslContext SSL_CTX struct
+ * @param code: Status code number
+ * @param message: String message
+ *
+ * Holding http status info
+ */
+typedef struct {
+  char *protocol;
+  int code;
+  char *message;
+} http_status;
+/**
+ * @brief Holding connection info
+ * @param socket: stores socket
+ * @param sslHandle: stores SSL
+ * @param sslContext: SSL_CTX struct
  *
  * Holding connection info
  */
@@ -116,22 +128,13 @@ void sslDisconnect (connection *c);
 char *sslError (int32_t ssl_error);
 
 /**
- * @brief HTTP status code corresponding message
- * @param code: Status code
- *
- * @return Proper message for HTTP status code.
- *
- **/
-char * http_status_messages (int code);
-
-/**
  * @brief Converts status line string to integer
- * @param status_line: Line with status message
+ * @param buffer: Input Buffer
  * 
  * @return HTTP status code Int.
  *
  **/
-int getIntCode (char * status_line);
+http_status HttpStatus (char * buffer);
 
 /**
  * @brief Wrapper for SSL_read
