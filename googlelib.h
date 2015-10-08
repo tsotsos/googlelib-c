@@ -181,6 +181,11 @@ char * GoogleAuthLink ( config settings, char * scope );
  **/
 char * GoogleAuthToken ( char * code, config settings);
 
-char * GoogleDrive ( char * token );
+/**
+ * @brief Sends a POST request in order to refresh token
+ * @param settings: config struct which icludes settings
+ *
+ **/
+char * GoogleAuthRefreshToken ( config settings);
 #endif // GOOGLELIB_H_
 
