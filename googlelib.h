@@ -45,6 +45,7 @@
 
 /**
  * @brief Holding connection info
+ * @param protocol: TCP protocol
  * @param code: Status code number
  * @param message: String message
  *
