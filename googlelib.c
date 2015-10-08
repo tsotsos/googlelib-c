@@ -106,30 +106,197 @@ void sslDisconnect (connection *c)
   free (c);
 }
 
+char *sslError (int32_t ssl_error)
+{
+  char * message = NULL;
+  switch (ssl_error) {
+  case SSL_ERROR_WANT_READ:
+    message = "SSL_ERROR_WANT_READ";
+    break;
+  case SSL_ERROR_WANT_WRITE:
+    message = "SSL_ERROR_WANT_WRITE";
+    break;
+  case SSL_ERROR_ZERO_RETURN:
+    message = "SSL_ERROR_ZERO_RETURN";
+    break;
+  default:
+    message = NULL;
+    break;
+  }
+  return message;
+}
+
+char * http_status_messages (int code)
+{
+  char * message = NULL;
+  switch (code) {
+  case 100:
+    message = "Continue";
+    break;
+  case 101:
+    message = "Switching Protocols";
+    break;
+  case 200:
+    message = "OK";
+    break;
+  case 201:
+    message = "Created";
+    break;
+  case 202:
+    message = "Accepted";
+    break;
+  case 203:
+    message = "Non-Authoritative Information";
+    break;
+  case 204:
+    message = "No Content";
+    break;
+  case 205:
+    message = "Reset Content";
+    break;
+  case 206:
+    message = "Partial Content";
+    break;
+  case 300:
+    message = "Multiple Choices";
+    break;
+  case 301:
+    message = "Moved Permanently";
+    break;
+  case 302:
+    message = "Moved Temporarily";
+    break;
+  case 303:
+    message = "See Other";
+    break;
+  case 304:
+    message = "Not Modified";
+    break;
+  case 305:
+    message = "Use Proxy";
+    break;
+  case 400:
+    message = "Bad Request";
+    break;
+  case 401:
+    message = "Unauthorized";
+    break;
+  case 402:
+    message = "Payment Required";
+    break;
+  case 403:
+    message = "Forbidden";
+    break;
+  case 404:
+    message = "Not Found";
+    break;
+  case 405:
+    message = "Method Not Allowed";
+    break;
+  case 406:
+    message = "Not Acceptable";
+    break;
+  case 407:
+    message = "Proxy Authentication Required";
+    break;
+  case 408:
+    message = "Request Time-out";
+    break;
+  case 409:
+    message = "Conflict";
+    break;
+  case 410:
+    message = "Gone";
+    break;
+  case 411:
+    message = "Length Required";
+    break;
+  case 412:
+    message = "Precondition Failed";
+    break;
+  case 413:
+    message = "Request Entity Too Large";
+    break;
+  case 414:
+    message = "Request-URI Too Large";
+    break;
+  case 415:
+    message = "Unsupported Media Type";
+    break;
+  case 500:
+    message = "Internal Server Error";
+    break;
+  case 501:
+    message = "Not Implemented";
+    break;
+  case 502:
+    message = "Bad Gateway";
+    break;
+  case 503:
+    message = "Service Unavailable";
+    break;
+  case 504:
+    message = "Gateway Time-out";
+    break;
+  case 505:
+    message = "HTTP Version not supported";
+    break;
+  default:
+    message = "Unknown http status code ";
+    break;
+  }
+  return message;
+}
+
+int getIntCode (char * status_line)
+{
+  char *a = strstr(status_line, "HTTP/1.0");
+  char *b = strstr (status_line , "HTTP/1.1");
+  if ( ( a != NULL ) )
+    memmove(status_line,status_line+strlen("HTTP/1.0"),
+            1+strlen(status_line+strlen("HTTP/1.1")));
+  else if ( ( b != NULL ) )
+    memmove(status_line,status_line+strlen("HTTP/1.1"),
+            1+strlen(status_line+strlen("HTTP/1.1")));
+  else
+    status_line="0";
+  return atoi(status_line);
+}
+
 char *sslRead (connection *c)
 {
   const int readSize = 1024;
-  char *rc = NULL;
+  char * rc = NULL;
   int received, count = 0;
   char buffer[1024];
   if (c) {
-    while ((received = SSL_read (c->sslHandle, buffer, readSize))) {
-      if (!rc)
-        rc = malloc (readSize + 1);
-      else
-        rc = realloc (rc, (count + 1) *
-                      readSize + 1);
-
-      buffer[received] = '\0';
-      if (received > 0)
+    received = SSL_read (c->sslHandle, buffer, readSize);
+    int ssl_error = SSL_get_error (c->sslHandle, received);
+    char *status_line = strtok(buffer,"\n");
+    int status_code = getIntCode(status_line);
+    if (ssl_error !=0) {
+      rc = sslError(ssl_error);
+    } else if ( (status_code == 200) ) {
+      while ((received > 0 )) {
+        if (!rc)
+          rc = malloc (readSize + 1);
+        else
+          rc = realloc (rc, (count + 1) * readSize + 1);
+        buffer[received] = '\0';
         strcat (rc, buffer);
-      if ( ( (rc[strlen(rc)-5] == '0') && (rc[strlen(rc)-4] == '\r')
-             && (rc[strlen(rc)-3] == '\n')&& (rc[strlen(rc)-2] == '\r')
-             && (rc[strlen(rc)-1] == '\n') ) ) {
-        break;
+        if ( (strstr(rc,"chunked") ) ) {
+          if ( ( (rc[strlen(rc)-5] == '0') && (rc[strlen(rc)-4] == '\r')
+                 && (rc[strlen(rc)-3] == '\n')&& (rc[strlen(rc)-2] == '\r')
+                 && (rc[strlen(rc)-1] == '\n') ) ) {
+            break;
+          }
+        }
+        count++;
       }
-      count++;
+    } else {
+      rc = http_status_messages(status_code);
     }
+
   }
   return rc;
 }
@@ -181,4 +348,3 @@ char * GoogleAuthToken ( char * code, config settings)
   free(postvars);
   return response;
 }
-
