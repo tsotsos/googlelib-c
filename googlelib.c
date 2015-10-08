@@ -136,21 +136,22 @@ http_status HttpStatus (char *buffer)
   status_line[nextLine - buffer] = '\0';
   char *a = strstr(status_line, "HTTP/1.0");
   char *b = strstr (status_line , "HTTP/1.1");
-  if ( ( a != NULL ) ){
+  if ( ( a != NULL ) ) {
     memmove(status_line,status_line+strlen("HTTP/1.0"),
             1+strlen(status_line+strlen("HTTP/1.0")));
-    status.protocol = "HTTP/1.1";}
-  else if ( ( b != NULL ) ) {
+    status.protocol = "HTTP/1.1";
+  } else if ( ( b != NULL ) ) {
     memmove(status_line,status_line+strlen("HTTP/1.1"),
             1+strlen(status_line+strlen("HTTP/1.1")));
-    status.protocol = "HTTP/1.1";  }
-  else{
+    status.protocol = "HTTP/1.1";
+  } else {
     status_line="0";
     status.protocol="NONE";
     status.code=0;
+    status.message="NONE";
   }
+  status.message = status_line;
   status.code = atoi(status_line);
-  free(status_line);
   return status;
 }
 
@@ -163,36 +164,36 @@ char *sslRead (connection *c)
   http_status status;
   if (c) {
     while ((received = SSL_read (c->sslHandle, buffer, readSize))) {
-        if (!rc)
-          rc = malloc (readSize + 1);
-        else
-          rc = realloc (rc, (count + 1) * readSize + 1);
-        buffer[received] = '\0';
-        ssl_error = SSL_get_error (c->sslHandle, received);
-        if (ssl_error !=0){
-          printf("Error:%s",sslError(ssl_error));
-          rc = "";
+      buffer[received] = '\0';
+      ssl_error = SSL_get_error (c->sslHandle, received);
+      if (ssl_error !=0) {
+        rc = sslError(ssl_error);
+        break;
+      }
+      status = HttpStatus(buffer);
+      if ( ( (count == 0) && (status.code !=200) ) ) {
+        rc =status.message;
+        break;
+      }
+      if (!rc)
+        rc = malloc (readSize + 1);
+      else
+        rc = realloc (rc, (count + 1) * readSize + 1);
+      if (received >0)
+        strcat (rc, buffer);
+      if ( (strstr(rc,"chunked") ) ) {
+        if ( ( (rc[strlen(rc)-5] == '0') && (rc[strlen(rc)-4] == '\r')
+               && (rc[strlen(rc)-3] == '\n')&& (rc[strlen(rc)-2] == '\r')
+               && (rc[strlen(rc)-1] == '\n') ) ) {
           break;
         }
-        status = HttpStatus(buffer);
-        if ( ( (count == 0) && (status.code !=200) ) ){
-            rc ="";
-            break;
-        }
-        if (received >0)
-          strcat (rc, buffer);
-        if ( (strstr(rc,"chunked") ) ) {
-          if ( ( (rc[strlen(rc)-5] == '0') && (rc[strlen(rc)-4] == '\r')
-                 && (rc[strlen(rc)-3] == '\n')&& (rc[strlen(rc)-2] == '\r')
-                 && (rc[strlen(rc)-1] == '\n') ) ) {
-            break;
-          }
-        }
-        count++;
       }
+      count++;
+    }
   }
   return rc;
 }
+
 
 void sslWrite (connection *c, char *text)
 {
