@@ -245,7 +245,7 @@ char * GoogleAuthToken ( char * code, config settings)
   sslDisconnect (c);
   free(post);
   free(postvars);
-  return "s";
+  return response;
 }
 char * GoogleAuthRefreshToken ( config settings)
 {
