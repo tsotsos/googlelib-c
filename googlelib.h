@@ -147,7 +147,7 @@ http_status HttpStatus (char * buffer);
  * They should be : 0-CR-LF-CR-LF.
  *
  **/
-char * sslRead (connection *c);
+int sslRead (char **response, connection *c);
 
 /**
  * @brief Wrapper for SSL_write
