@@ -134,7 +134,6 @@ http_status HttpStatus (char *buffer)
   status_line = ( char * )malloc( nextLine - buffer + 1 );
   status_line[nextLine - buffer] = '\0';
   memcpy( status_line, buffer, (nextLine - buffer));
-  printf("\n\n\n\n\n\nStatus line:%s\n\n\n\n\n\n\n\n",status_line);
   char *a = strstr(status_line, "HTTP/1.0");
   char *b = strstr (status_line , "HTTP/1.1");
   if ( ( a != NULL ) ) {
@@ -156,7 +155,7 @@ http_status HttpStatus (char *buffer)
   return status;
 }
 
-char *sslRead (connection *c)
+int sslRead (char **response, connection *c)
 {
   const int readSize = 512;
   char * rc = NULL;
@@ -167,16 +166,17 @@ char *sslRead (connection *c)
     while ((received = SSL_read (c->sslHandle, buffer, readSize))) {
       buffer[received] = '\0';
       ssl_error = SSL_get_error (c->sslHandle, received);
-      printf("\n\n\n COUNT %d\n\n",count);
       if (ssl_error !=0) {
         rc = sslError(ssl_error);
-        break;
+        *response = rc;
+        return ssl_error;
       }
-      if ( (count == 0) ){
+      if ( (count == 0) ) {
         status = HttpStatus(buffer);
         if ( (status.code !=200) ) {
           rc =status.message;
-          break;
+          *response = rc;
+          return status.code;
         }
       }
       if (!rc)
@@ -195,7 +195,8 @@ char *sslRead (connection *c)
       count++;
     }
   }
-  return rc;
+  *response = rc;
+  return 0;
 }
 
 
@@ -218,7 +219,7 @@ char * GoogleAuthLink ( config settings, char * scope )
 char * GoogleAuthToken ( char * code, config settings)
 {
   connection *c;
-  char *response;
+  char *response=NULL;
   char *postvars = NULL;
   char *post = NULL;
   const char * postvars_format =
@@ -240,16 +241,16 @@ char * GoogleAuthToken ( char * code, config settings)
            strlen(postvars),postvars);
   c = sslConnect (settings.tokenhost,443);
   sslWrite (c, post);
-  response = sslRead (c);
+  sslRead (&response,c);
   sslDisconnect (c);
   free(post);
   free(postvars);
-  return response;
+  return "s";
 }
 char * GoogleAuthRefreshToken ( config settings)
 {
   connection *c;
-  char *response;
+  char *response=NULL;
   char *postvars = NULL;
   char *post = NULL;
   const char * postvars_format =
@@ -262,7 +263,8 @@ char * GoogleAuthRefreshToken ( config settings)
   size_t postvars_length = snprintf(NULL,0,postvars_format,settings.refresh_token,
                                     settings.client_id,settings.client_secret,settings.redirect_uri) + 1;
   postvars = malloc(postvars_length);
-  snprintf(postvars,postvars_length,postvars_format,settings.refresh_token,settings.client_id,
+  snprintf(postvars,postvars_length,postvars_format,settings.refresh_token,
+           settings.client_id,
            settings.client_secret,settings.redirect_uri);
   size_t post_length = snprintf(NULL,0,post_format, settings.tokenpage,
                                 settings.tokenhost,strlen(postvars),postvars) + 1;
@@ -270,8 +272,7 @@ char * GoogleAuthRefreshToken ( config settings)
   snprintf(post,post_length,post_format, settings.tokenpage,settings.tokenhost,
            strlen(postvars),postvars);
   c = sslConnect (settings.tokenhost,443);
-  sslWrite (c, post);
-  response = sslRead (c);
+  sslRead (&response,c);
   sslDisconnect (c);
   free(post);
   free(postvars);
