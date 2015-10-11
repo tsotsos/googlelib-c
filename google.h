@@ -43,6 +43,25 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#define GOOGLEAPI_HOST "www.googleapis.com"
+#define GOOGLEAUTH_HOST "accounts.google.com"
+#define GOOGLEAPI_PORT 443
+#define GOOGLEAUTHPAGE "/o/oauth2/auth"
+#define GOOGLETOKENPAGE "/oauth2/v3/token"
+/**
+ * @brief Holding json info
+ * This struct is holding name/value type of Json
+ * response from google.
+ *
+ * @param name: Name of response
+ * @param value: Value of response
+ *
+ */
+typedef struct {
+  char * name;
+  char * value;
+  size_t length;
+} Json;
 
 /**
  * @brief Holding complete google response
@@ -88,14 +107,11 @@ typedef struct {
  * Holding settings info.
  */
 typedef struct {
-  char * authhost;
-  char * authpage;
-  char * tokenhost;
-  char * tokenpage;
   char * client_id;
   char * client_secret;
   char * redirect_uri;
   char * refresh_token;
+  char * access_token;
 } config;
 
 /**
@@ -123,7 +139,52 @@ char *trim(char *input);
  *
  * Gets the containing string between two others (first and last)
  **/
+
 char *find_between(char *response,char *first, char *last);
+/**
+ * @brief Reads a file
+ * @param filename:  The filename
+ *
+ * Reads a file to buffer *char
+ **/
+char * ReadFile(char * filename);
+
+/**
+ * @brief Parses a Json style string
+ * @param json:  Json style string
+ * @param value:  The wanted value
+ *
+ * Finds a value based on its name in a Json string
+ **/
+char* parseJson(char *json, char *value);
+
+/**
+* @brief Find a value of config
+* @param string:  Config string
+* @param value:  The wanted value
+*
+* Finds a value based on its name in a Config string
+**/
+char * getValue(char * string, char * value);
+
+/**
+ * @brief Get the settings from config file
+ * @param filename:  Config filename
+ *
+ * Stores the settings from config file to a config
+ * struct.
+ **/
+config getSettings(char *filename);
+
+/**
+ * @brief Saves settings to file
+ * @param filename:  Config filename
+ * @param name: Name of value to add o replace
+ * @param value:  The value
+ *
+ * Saves/replace the wanted value by its name (preferable to config file)
+ **/
+void setSetting(char * filename, char *name , char *value );
 
 /**
  * @brief Establishes a tcp connection.
@@ -172,7 +233,7 @@ char * http_status_messages (int code);
 /**
  * @brief Converts status line string to integer
  * @param buffer: Input Buffer
- * 
+ *
  * @return HTTP status code Int.
  *
  **/
@@ -206,26 +267,42 @@ void sslWrite (connection * c, char *text);
  * see at : https://developers.google.com/+/web/api/rest/oauth
  *
  * Use this function to force user authorize your application.
- * 
+ *
  **/
 char * GoogleAuthLink ( config settings, char * scope );
 
 /**
- * @brief Sends a POST request to exchange
- * authentication code with accsess token
+ * @brief Formats a Header string to exchange code with access_token
  * @param code: string with access code from user
  * @param settings: config struct which icludes settings
  *
  * This function returns GoogleResponse struct. Almost every time
  * 'message' is n json format.
  **/
-GoogleResponse GoogleAuthToken ( char * code, config settings);
+char * HeadersAuthToken( char *code, config settings);
 
 /**
- * @brief Sends a POST request in order to refresh token
+ * @brief Properly formats a char* with headers for token refresh
  * @param settings: config struct which icludes settings
  *
  **/
-GoogleResponse GoogleAuthRefreshToken ( config settings);
+char * HeadersRefreshToken( config settings);
+
+/**
+ * @brief Connects with google using the given headers
+ * @param headers: Headers as formed by functions provided.
+ *
+ **/
+GoogleResponse GoogleConnect ( char * headers);
+
+/**
+ * @brief Handles response from google api.
+ * @param response:  response string
+ *
+ * Stores the google response if it is type of "application/json"
+ * to an 'array' of structs (Json).
+ **/
+Json * parseResponse(char * response);
 #endif // GOOGLE_H_
+
 
