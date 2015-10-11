@@ -25,7 +25,7 @@ LDFLAGS = -shared
 RM = rm -f  # rm command
 TARGET_LIB = googlelib-c.so
 
-SRCS = googlelib.c gapi.c
+SRCS = google.c googleapi.c
 OBJS = $(SRCS:.c=.o)
 
 .PHONY: all
