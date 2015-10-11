@@ -72,6 +72,128 @@ char * find_between(char *input,char *first, char *last)
   return NULL;
 }
 
+char * ReadFile(char * filename)
+{
+  char *buffer = NULL;
+  int string_size,read_size;
+  FILE *handler = fopen(filename,"r");
+
+  if (handler) {
+    fseek(handler,0,SEEK_END);
+    string_size = ftell (handler);
+    rewind(handler);
+    buffer = (char*) malloc (sizeof(char) * (string_size + 1) );
+    read_size = fread(buffer,sizeof(char),string_size,handler);
+    buffer[string_size] = '\0';
+    if (string_size != read_size) {
+      free(buffer);
+      buffer = NULL;
+    }
+  }
+
+  return buffer;
+}
+
+char* parseJson(char *json, char *value)
+{
+  value = concat("{\"", value);
+  value = concat(value,"\": \"");
+  char *last = "\"";
+  char *target = NULL;
+  char *start, *end;
+
+  if ( (start = strstr( json, value ) )) {
+    start += strlen( value );
+    if ( (end = strstr( start, last ) )) {
+      target = ( char * )malloc( end - start + 1 );
+      memcpy( target, start, end - start );
+      target[end - start] = '\0';
+    }
+  }
+  if ( target )
+    return target;
+  else
+    free(target);
+  exit(EXIT_FAILURE);
+}
+
+char * getValue(char * string, char * value)
+{
+  string=trim(string);
+  value = concat(value,"=\"");
+  char *last = "\"";
+  char *target = NULL;
+  char *start, *end;
+
+  if ( (start = strstr( string, value ) )) {
+    start += strlen( value );
+    if ( (end = strstr( start, last ) )) {
+      target = ( char * )malloc( end - start + 1 );
+      memcpy( target, start, end - start );
+      target[end - start] = '\0';
+    }
+  }
+  if ( target )
+    return target;
+  else
+    free(target);
+  return NULL;
+}
+
+config getSettings(char *filename)
+{
+  config settings;
+  char * file = trim(ReadFile(filename));
+  settings.client_id=getValue(file,"client_id");
+  settings.client_secret=getValue(file,"client_secret");
+  settings.redirect_uri=getValue(file,"redirect_uri");
+  settings.refresh_token=getValue(file,"refresh_token");
+
+  return settings;
+}
+
+void setSetting(char * filename, char *name , char *value )
+{
+  FILE *input = fopen(filename, "r");
+  FILE *output = fopen("tmp.txt", "w");
+  char buffer[512];
+  int controller = 0;
+  while (fgets(buffer, sizeof(buffer), input) != NULL) {
+    char *pos = strstr(buffer, name);
+    if (pos != NULL) {
+      const char * format = "%s=\"%s\"; ";
+      char * newvar = NULL;
+      size_t flen = snprintf(NULL,0,format,name,value);
+      newvar = malloc(flen+1);
+      snprintf(newvar,flen,format,name,value);
+      printf("\n\n\n %s",newvar);
+      char *temp = calloc(strlen(buffer) - strlen(name) + flen + 1, 1);
+      memcpy(temp, buffer, pos - buffer);
+      memcpy(temp + (pos - buffer), newvar, flen);
+      fputs(temp, output);
+      free(temp);
+      controller = 1;
+    } else
+      fputs(buffer, output);
+  }
+  if ( controller != 1  ) {
+    const char * format = "%s=\"%s\";\n";
+    char * newvar = NULL;
+    size_t flen = snprintf(NULL,0,format,name,value);
+    newvar = malloc(flen+1);
+    snprintf(newvar,flen,format,name,value);
+    char *temp = calloc(
+                   strlen(buffer) + flen+1, 1);
+    memcpy(temp, newvar, flen);
+    fputs(temp, output);
+  }
+  fclose(output);
+  fclose(input);
+
+  /* Rename the temporary file to the original file */
+  rename("tmp.txt", filename);
+}
+
 int tcpConnect (char * server_addr, int server_port)
 {
   int error, handle;
@@ -280,13 +402,11 @@ char * status_message (int code)
 }
 int getIntCode (char * buffer)
 {
-  printf("buffer: %s\n",buffer);
   char * nextLine = strchr(buffer, '\n');
   char * status_line = NULL;
   status_line = ( char * )malloc( nextLine - buffer + 1 );
   status_line[nextLine - buffer] = '\0';
   memcpy( status_line, buffer, (nextLine - buffer));
-  printf("status line: %s",status_line);
   char *a = strstr(status_line, "HTTP/1.0");
   char *b = strstr (status_line , "HTTP/1.1");
   if ( ( a != NULL ) )
@@ -347,16 +467,12 @@ char * GoogleAuthLink ( config settings, char * scope )
   char * link=  malloc(2048);
   sprintf(link,
           "https://%s%s?redirect_uri=%s&response_type=code&client_id=%s&scope=%s",
-          settings.authhost,settings.authpage,settings.redirect_uri,settings.client_id,
+          GOOGLEAUTH_HOST,GOOGLEAUTHPAGE,settings.redirect_uri,settings.client_id,
           scope);
   return link;
 }
-
-GoogleResponse GoogleAuthToken ( char * code, config settings)
+char * HeadersAuthToken( char *code, config settings)
 {
-  connection *c;
-  GoogleResponse result;
-  char *response=NULL;
   char *postvars = NULL;
   char *post = NULL;
   const char * postvars_format =
@@ -371,30 +487,15 @@ GoogleResponse GoogleAuthToken ( char * code, config settings)
   postvars = malloc(postvars_length);
   snprintf(postvars,postvars_length,postvars_format,code,settings.client_id,
            settings.client_secret,settings.redirect_uri);
-  size_t post_length = snprintf(NULL,0,post_format, settings.tokenpage,
-                                settings.tokenhost,strlen(postvars),postvars) + 1;
+  size_t post_length = snprintf(NULL,0,post_format, GOOGLETOKENPAGE,
+                                GOOGLEAPI_HOST,strlen(postvars),postvars) + 1;
   post = malloc(post_length);
-  snprintf(post,post_length,post_format, settings.tokenpage,settings.tokenhost,
+  snprintf(post,post_length,post_format, GOOGLETOKENPAGE,GOOGLEAPI_HOST,
            strlen(postvars),postvars);
-  c = sslConnect (settings.tokenhost,443);
-  sslWrite (c, post);
-  int read = sslRead (&response,c);
-  result.message = response;
-  result.http_code = read;
-  result.http_message = status_message(read);
-  result.error = find_between(response,"\"error\": \"","\"");
-  result.error_description = find_between(response,"\"error_description\": \"",
-                                          "\"");
-  sslDisconnect (c);
-  free(post);
-  free(postvars);
-  return result;
+  return post;
 }
-GoogleResponse GoogleAuthRefreshToken ( config settings)
+char * HeadersRefreshToken( config settings)
 {
-  connection *c;
-  GoogleResponse result;
-  char *response=NULL;
   char *postvars = NULL;
   char *post = NULL;
   const char * postvars_format =
@@ -410,12 +511,21 @@ GoogleResponse GoogleAuthRefreshToken ( config settings)
   snprintf(postvars,postvars_length,postvars_format,settings.refresh_token,
            settings.client_id,
            settings.client_secret,settings.redirect_uri);
-  size_t post_length = snprintf(NULL,0,post_format, settings.tokenpage,
-                                settings.tokenhost,strlen(postvars),postvars) + 1;
+  size_t post_length = snprintf(NULL,0,post_format, GOOGLETOKENPAGE,
+                                GOOGLEAPI_HOST,strlen(postvars),postvars) + 1;
   post = malloc(post_length);
-  snprintf(post,post_length,post_format, settings.tokenpage,settings.tokenhost,
+  snprintf(post,post_length,post_format, GOOGLETOKENPAGE,GOOGLEAPI_HOST,
            strlen(postvars),postvars);
-  c = sslConnect (settings.tokenhost,443);
+  return post;
+}
+
+GoogleResponse GoogleConnect ( char * headers)
+{
+  connection *c;
+  GoogleResponse result;
+  char *response=NULL;
+  c = sslConnect (GOOGLEAPI_HOST,GOOGLEAPI_PORT);
+  sslWrite (c, headers);
   int read = sslRead (&response,c);
   result.message = response;
   result.http_code = read;
@@ -423,10 +533,43 @@ GoogleResponse GoogleAuthRefreshToken ( config settings)
   result.error = find_between(response,"\"error\": \"","\"");
   result.error_description = find_between(response,"\"error_description\": \"",
                                           "\"");
-  result.message = response;
   sslDisconnect (c);
-  free(post);
-  free(postvars);
+  free(headers);
   return result;
 }
 
+Json * parseResponse(char * response)
+{
+  Json *json=0;
+  char *content_type = find_between(response,"Content-Type: ",";");
+  // Checks for content type = "application/json"
+  int content_type_cmp = strcmp(content_type,"application/json");
+  int i=0;
+  if (content_type_cmp == 0) {
+    char * curLine = find_between(response,"{","}");
+    // read every line of Json string
+    while(curLine) {
+      char * nextLine = strchr(curLine, '\n');
+      if (nextLine) *nextLine = '\0';
+      char * key = find_between(curLine,"\"","\":");
+      char * val = find_between(curLine,": \"","\"");
+      if (val == NULL) // check for integer
+        val = find_between(curLine,": ",",");
+      printf("key=%s, val=%s\n",key,val);
+      if ( ((key != NULL) && (val !=NULL) ) ) {
+        if (i==0)
+          json = malloc(1 * sizeof(Json));
+        else
+          json = realloc (json, ((i + 1) * sizeof(Json)));
+        json[i].name = key;
+        json[i].value = val;
+        json[0].length = i; //'array' size storing
+        i++;
+      }
+      if (nextLine) *nextLine = '\n';
+      curLine = nextLine ? (nextLine+1) : NULL;
+    }
+  } else
+    json = 0;
+  return json;
+}
