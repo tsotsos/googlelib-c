@@ -29,167 +29,25 @@
  *
  */
 #include "googleapi.h"
-
-char * ReadFile(char * filename)
+         /*
+char * GoogleDrive (char * token)
 {
-  char *buffer = NULL;
-  int string_size,read_size;
-  FILE *handler = fopen(filename,"r");
-
-  if (handler) {
-    fseek(handler,0,SEEK_END);
-    string_size = ftell (handler);
-    rewind(handler);
-    buffer = (char*) malloc (sizeof(char) * (string_size + 1) );
-    read_size = fread(buffer,sizeof(char),string_size,handler);
-    buffer[string_size] = '\0';
-    if (string_size != read_size) {
-      free(buffer);
-      buffer = NULL;
-    }
-  }
-
-  return buffer;
+  connection *c;
+  char *response;
+  char *request=NULL;
+  const char * format = "GET https://%s%s?access_token=%s\r\n";
+  size_t length_request = snprintf(NULL,0,format,"www.googleapis.com","/drive/v2/files",token)+1;
+  request = malloc(length_request);
+  snprintf(request,length_request,format,"www.googleapis.com","/drive/v2/files",token);
+  printf("\nREQUEST:%s\n",request);
+  c = sslConnect ("www.googleapis.com",443);
+  sslWrite (c, request);
+  response = sslRead (c);
+  sslDisconnect (c);
+  printf("%s",response);
+  FILE *f = fopen("file.txt", "w");
+  fprintf(f, "%s", response);
+  printf("\nResponse length %zu\n",strlen(response));
+  return response;
 }
-
-char* parseJson(char *json, char *value)
-{
-  value = concat("{\"", value);
-  value = concat(value,"\": \"");
-  char *last = "\"";
-  char *target = NULL;
-  char *start, *end;
-
-  if ( (start = strstr( json, value ) )) {
-    start += strlen( value );
-    if ( (end = strstr( start, last ) )) {
-      target = ( char * )malloc( end - start + 1 );
-      memcpy( target, start, end - start );
-      target[end - start] = '\0';
-    }
-  }
-  if ( target )
-    return target;
-  else
-    free(target);
-  exit(EXIT_FAILURE);
-}
-
-char * getValue(char * string, char * value)
-{
-  string=trim(string);
-  value = concat(value,"=\"");
-  char *last = "\"";
-  char *target = NULL;
-  char *start, *end;
-
-  if ( (start = strstr( string, value ) )) {
-    start += strlen( value );
-    if ( (end = strstr( start, last ) )) {
-      target = ( char * )malloc( end - start + 1 );
-      memcpy( target, start, end - start );
-      target[end - start] = '\0';
-    }
-  }
-  if ( target )
-    return target;
-  else
-    free(target);
-  return NULL;
-}
-
-config getSettings(char *filename)
-{
-  config settings;
-  char * file = trim(ReadFile(filename));
-  settings.authhost=getValue(file,"authhost");
-  settings.authpage=getValue(file,"authpage");
-  settings.tokenhost=getValue(file,"tokenhost");
-  settings.tokenpage=getValue(file,"tokenpage");
-  settings.client_id=getValue(file,"client_id");
-  settings.client_secret=getValue(file,"client_secret");
-  settings.redirect_uri=getValue(file,"redirect_uri");
-  settings.refresh_token=getValue(file,"refresh_token");
-
-  return settings;
-}
-
-void setSetting(char * filename, char *name , char *value )
-{
-  FILE *input = fopen(filename, "r");
-  FILE *output = fopen("tmp.txt", "w");
-  char buffer[512];
-  int controller = 0;
-  while (fgets(buffer, sizeof(buffer), input) != NULL) {
-    char *pos = strstr(buffer, name);
-    if (pos != NULL) {
-      const char * format = "%s=\"%s\"; ";
-      char * newvar = NULL;
-      size_t flen = snprintf(NULL,0,format,name,value);
-      newvar = malloc(flen+1);
-      snprintf(newvar,flen,format,name,value);
-      printf("\n\n\n %s",newvar);
-      char *temp = calloc(strlen(buffer) - strlen(name) + flen + 1, 1);
-      memcpy(temp, buffer, pos - buffer);
-      memcpy(temp + (pos - buffer), newvar, flen);
-      fputs(temp, output);
-      free(temp);
-      controller = 1;
-    } else
-      fputs(buffer, output);
-  }
-  if ( controller != 1  ) {
-    const char * format = "%s=\"%s\";\n";
-    char * newvar = NULL;
-    size_t flen = snprintf(NULL,0,format,name,value);
-    newvar = malloc(flen+1);
-    snprintf(newvar,flen,format,name,value);
-    char *temp = calloc(
-                   strlen(buffer) + flen+1, 1);
-    memcpy(temp, newvar, flen);
-    fputs(temp, output);
-  }
-  fclose(output);
-  fclose(input);
-
-  /* Rename the temporary file to the original file */
-  rename("tmp.txt", filename);
-}
-
-
-Json * parseResponse(char * response)
-{
-  Json *json=0;
-  // char *http_code = find_between(response,"HTTP/1.1 ","\r");
-  char *content_type = find_between(response,"Content-Type: ",";");
-  // Checks for content type = "application/json"
-  int content_type_cmp = strcmp(content_type,"application/json");
-  int i=0;
-  if (content_type_cmp == 0) {
-    char * curLine = find_between(response,"{","}");
-    // read every line of Json string
-    while(curLine) {
-      char * nextLine = strchr(curLine, '\n');
-      if (nextLine) *nextLine = '\0';
-      char * key = find_between(curLine,"\"","\":");
-      char * val = find_between(curLine,": \"","\"");
-      if (val == NULL) // check for integer
-        val = find_between(curLine,": ",",");
-      printf("key=%s, val=%s\n",key,val);
-      if ( ((key != NULL) && (val !=NULL) ) ) {
-        if (i==0)
-          json = malloc(1 * sizeof(Json));
-        else
-          json = realloc (json, ((i + 1) * sizeof(Json)));
-        json[i].name = key;
-        json[i].value = val;
-        json[0].length = i; //'array' size storing
-        i++;
-      }
-      if (nextLine) *nextLine = '\n';
-      curLine = nextLine ? (nextLine+1) : NULL;
-    }
-  } else
-    json = 0;
-  return json;
-}
+*/
