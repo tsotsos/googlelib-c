@@ -32,7 +32,7 @@
 char * DriveFiles ( char *token)
 {
   char *request=NULL;
-  const char * format = "GET https://%s%s?access_token=%s\r\n";
+  const char * format = "GET https://%s/%s?access_token=%s\r\n";
   size_t length_request = snprintf(NULL,0,format,GOOGLEAPI_HOST,DRIVE_FILES,
                                    token)+1;
   request = malloc(length_request);
