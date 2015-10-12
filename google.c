@@ -208,7 +208,6 @@ int tcpConnect (char * server_addr, int server_port)
     server.sin_family = AF_INET;
     server.sin_port = htons (server_port);
     server.sin_addr = *((struct in_addr *) host->h_addr_list[0]);
-    // NOT C11 : bzero (&(server.sin_zero), 8);
     memset (&(server.sin_zero),0, 8);
     error = connect (handle, (struct sockaddr *) &server,
                      sizeof (struct sockaddr));
