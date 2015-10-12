@@ -190,7 +190,6 @@ void setSetting(char * filename, char *name , char *value )
   fclose(output);
   fclose(input);
 
-  /* Rename the temporary file to the original file */
   rename("tmp.txt", filename);
 }
 
