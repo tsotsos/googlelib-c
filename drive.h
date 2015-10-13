@@ -30,6 +30,14 @@
 
 #define DRIVE_FILES "drive/v2/files"
 
-char * DriveFiles ( char *token);
+typedef enum {
+  true,
+  false
+  } bool;
 
+char * DriveAbout ( char *token, bool includeSubscribed, long maxChangeIdCount, long startChangeId,char *fields);
+
+char * DriveFiles ( char *token);
 #endif // DRIVE_H_
+
+
