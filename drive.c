@@ -28,14 +28,31 @@
  *
  */
 #include "drive.h"
-
-char * DriveFiles ( char *token)
+char * About ( char *token, char *includeSubscribed, long maxChangeIdCount,
+               long startChangeId )
 {
-  char *request=NULL;
-  const char * format = "GET https://%s/%s?access_token=%s\r\n";
-  size_t length_request = snprintf(NULL,0,format,GOOGLEAPI_HOST,DRIVE_FILES,
-                                   token)+1;
-  request = malloc(length_request);
-  snprintf(request,length_request,format,GOOGLEAPI_HOST,DRIVE_FILES,token);
-  return request;
+        char * format = NULL;
+        format = "GET https://%s/drive/%s/%s?access_token=%s";
+        if ( ( includeSubscribed != NULL ) )
+                format = concat ( format,"&includeSubscribed=%s" );
+        if ( ( maxChangeIdCount >= 0 ) )
+                format = concat ( format,"&maxChangeIdCount=%lu" );
+        if ( ( startChangeId >= 0 ) )
+                format = concat ( format,"&startChangeId=%lu" );
+        return format;
 }
+char * DriveFiles ( char *token )
+{
+        char *request=NULL;
+        const char * format = "GET https://%s/%s?access_token=%s\r\n";
+        size_t length_request = snprintf ( NULL,0,format,GOOGLEAPI_HOST,DRIVE_FILES,
+                                           token )+1;
+        request = malloc ( length_request );
+        snprintf ( request,length_request,format,GOOGLEAPI_HOST,DRIVE_FILES,token );
+        printf ( "\n Request :%s\n",request );
+        return request;
+}
+
+
+
+

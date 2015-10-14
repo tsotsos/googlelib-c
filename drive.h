@@ -29,15 +29,14 @@
 #include "google.h"
 
 #define DRIVE_FILES "drive/v2/files"
+#define DRIVE_VERSION "v2"
+#define DRIVE_ABOUT "about"
 
-typedef enum {
-  true,
-  false
-  } bool;
+char * About ( char *token, char *includeSubscribed, long maxChangeIdCount,
+               long startChangeId );
 
-char * DriveAbout ( char *token, bool includeSubscribed, long maxChangeIdCount, long startChangeId,char *fields);
-
-char * DriveFiles ( char *token);
+char * DriveFiles ( char *token );
 #endif // DRIVE_H_
+
 
 

@@ -58,9 +58,9 @@
  *
  */
 typedef struct {
-  char * name;
-  char * value;
-  size_t length;
+        char * name;
+        char * value;
+        size_t length;
 } Json;
 
 /**
@@ -74,11 +74,11 @@ typedef struct {
  * Holding Google response message and status.
  */
 typedef struct {
-  int http_code;
-  char *http_message;
-  char *error;
-  char *error_description;
-  char *message;
+        int http_code;
+        char *http_message;
+        char *error;
+        char *error_description;
+        char *message;
 } GoogleResponse;
 /**
  * @brief Holding connection info
@@ -89,9 +89,9 @@ typedef struct {
  * Holding connection info
  */
 typedef struct {
-  int socket;
-  SSL *sslHandle;
-  SSL_CTX *sslContext;
+        int socket;
+        SSL *sslHandle;
+        SSL_CTX *sslContext;
 } connection;
 /**
  * @brief Holding settings
@@ -107,11 +107,11 @@ typedef struct {
  * Holding settings info.
  */
 typedef struct {
-  char * client_id;
-  char * client_secret;
-  char * redirect_uri;
-  char * refresh_token;
-  char * access_token;
+        char * client_id;
+        char * client_secret;
+        char * redirect_uri;
+        char * refresh_token;
+        char * access_token;
 } config;
 
 /**
@@ -122,14 +122,14 @@ typedef struct {
  * Concatenates two strings
  **/
 
-char *concat(char *s1, char *s2);
+char *concat ( char *s1, char *s2 );
 /**
  * @brief Triming function.
  * @param input:  string
  *
  * Remove spaces of a string
  **/
-char *trim(char *input);
+char *trim ( char *input );
 
 /**
  * @brief Finds between two strings
@@ -140,14 +140,14 @@ char *trim(char *input);
  * Gets the containing string between two others (first and last)
  **/
 
-char *find_between(char *response,char *first, char *last);
+char *find_between ( char *response,char *first, char *last );
 /**
  * @brief Reads a file
  * @param filename:  The filename
  *
  * Reads a file to buffer *char
  **/
-char * ReadFile(char * filename);
+char * ReadFile ( char * filename );
 
 /**
  * @brief Parses a Json style string
@@ -156,7 +156,7 @@ char * ReadFile(char * filename);
  *
  * Finds a value based on its name in a Json string
  **/
-char* parseJson(char *json, char *value);
+char* parseJson ( char *json, char *value );
 
 /**
 * @brief Find a value of config
@@ -165,7 +165,7 @@ char* parseJson(char *json, char *value);
 *
 * Finds a value based on its name in a Config string
 **/
-char * getValue(char * string, char * value);
+char * getValue ( char * string, char * value );
 
 /**
  * @brief Get the settings from config file
@@ -174,7 +174,7 @@ char * getValue(char * string, char * value);
  * Stores the settings from config file to a config
  * struct.
  **/
-config getSettings(char *filename);
+config getSettings ( char *filename );
 
 /**
  * @brief Saves settings to file
@@ -184,7 +184,7 @@ config getSettings(char *filename);
  *
  * Saves/replace the wanted value by its name (preferable to config file)
  **/
-void setSetting(char * filename, char *name , char *value );
+void setSetting ( char * filename, char *name , char *value );
 
 /**
  * @brief Establishes a tcp connection.
@@ -193,7 +193,7 @@ void setSetting(char * filename, char *name , char *value );
  *
  * Establishes a TCP connection.
  **/
-int tcpConnect (char * server_addr, int server_port);
+int tcpConnect ( char * server_addr, int server_port );
 
 /**
  * @brief Establishes a connection using SSL layer
@@ -203,7 +203,7 @@ int tcpConnect (char * server_addr, int server_port);
  * Establishes a connection using SSL layer and handles
  * connection errors.
  **/
-connection * sslConnect (char * server_addr,int server_port);
+connection * sslConnect ( char * server_addr,int server_port );
 
 /**
  * @brief Stops connection
@@ -211,7 +211,7 @@ connection * sslConnect (char * server_addr,int server_port);
  *
  * Closes socket and free the SSL connection.
  **/
-void sslDisconnect (connection *c);
+void sslDisconnect ( connection *c );
 
 /**
  * @brief Error handling for SSL-layer
@@ -220,7 +220,7 @@ void sslDisconnect (connection *c);
  * @return Message for SSL error.
  *
  **/
-char *sslError (int32_t ssl_error);
+char *sslError ( int32_t ssl_error );
 
 /**
  * @brief HTTP status message and SSL messages
@@ -229,7 +229,7 @@ char *sslError (int32_t ssl_error);
  * @return Message of HTTP status or SSL error if any.
  *
  **/
-char * http_status_messages (int code);
+char * http_status_messages ( int code );
 /**
  * @brief Converts status line string to integer
  * @param buffer: Input Buffer
@@ -237,7 +237,7 @@ char * http_status_messages (int code);
  * @return HTTP status code Int.
  *
  **/
-int getIntCode (char * buffer);
+int getIntCode ( char * buffer );
 
 /**
  * @brief Wrapper for SSL_read
@@ -249,7 +249,7 @@ int getIntCode (char * buffer);
  * They should be : 0-CR-LF-CR-LF.
  *
  **/
-int sslRead (char **response, connection *c);
+int sslRead ( char **response, connection *c );
 
 /**
  * @brief Wrapper for SSL_write
@@ -258,7 +258,7 @@ int sslRead (char **response, connection *c);
  *
  * Simplify SSL_write if the (struct) connection exists
  **/
-void sslWrite (connection * c, char *text);
+void sslWrite ( connection * c, char *text );
 
 /**
  * @brief Formats a string with link for google authorization
@@ -279,21 +279,21 @@ char * GoogleAuthLink ( config settings, char * scope );
  * This function returns GoogleResponse struct. Almost every time
  * 'message' is n json format.
  **/
-char * HeadersAuthToken( char *code, config settings);
+char * HeadersAuthToken ( char *code, config settings );
 
 /**
  * @brief Properly formats a char* with headers for token refresh
  * @param settings: config struct which icludes settings
  *
  **/
-char * HeadersRefreshToken( config settings);
+char * HeadersRefreshToken ( config settings );
 
 /**
  * @brief Connects with google using the given headers
  * @param headers: Headers as formed by functions provided.
  *
  **/
-GoogleResponse GoogleConnect ( char * headers);
+GoogleResponse GoogleConnect ( char * headers );
 
 /**
  * @brief Handles response from google api.
@@ -302,7 +302,8 @@ GoogleResponse GoogleConnect ( char * headers);
  * Stores the google response if it is type of "application/json"
  * to an 'array' of structs (Json).
  **/
-Json * parseResponse(char * response);
+Json * parseResponse ( char * response );
 #endif // GOOGLE_H_
+
 
 
