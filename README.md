@@ -4,8 +4,8 @@ This project intends to help other programmers use [**Google API**](https://deve
 
 **Some initial goals are:**
 
+* Complate Drive Api calls (drive.h)
 * Complete Api calls
-* Error Handling for Json Response ( returned by GoogleResponse() )
 * Portability for almost any Linux box
 
 **Dependencies**
@@ -15,5 +15,4 @@ This project intends to help other programmers use [**Google API**](https://deve
 
 Contribute
 ----------
-
 GoogleLib-c is written (and will continue) according with POSIX and C11. Linux Kernel Coding style and Comments has been adapted. So if you decide to contribute please use them. 
