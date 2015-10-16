@@ -1,4 +1,5 @@
 docs/*
+!docs/doxy
 *.o
 *.d
 *.so
