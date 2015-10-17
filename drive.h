@@ -27,7 +27,7 @@
 #ifndef DRIVE_H_
 #define DRIVE_H_
 #include "google.h"
-
+#include "dprint.h"
 #define DRIVE_FILES "drive/v2/files"
 #define DRIVE_VERSION "v2"
 #define DRIVE_ABOUT "about"
@@ -35,8 +35,8 @@
 char * About ( char *token, char *includeSubscribed, long maxChangeIdCount,
                long startChangeId );
 
-char * DriveFiles ( char *token );
 #endif // DRIVE_H_
+
 
 
 
