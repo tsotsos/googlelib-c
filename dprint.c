@@ -24,8 +24,8 @@
  *
  *
  */
-
-int asprintf ( char **str, char* fmt, ... )
+#include "dprint.h"
+int a_sprintf ( char **str, char* fmt, ... )
 {
         va_list argp;
         va_start ( argp, fmt );
