@@ -1,5 +1,5 @@
 /** @file dprint.h
- *  @brief Function prototypes for Google Drive Api.
+ *  @brief Function prototype for a_sprintf.
  *
  *  @author Georgios Tsotsos
  *  @bug Not any known bugs.
@@ -30,6 +30,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-int a_sprintf(char **str, char* fmt, ...) __attribute__ ((format (printf,2,3)));
+int a_sprintf ( char **str, char* fmt, ... ) __attribute__ ( ( format ( printf,
+                2,3 ) ) );
 
 #endif // DPRINT_H_
+
+
