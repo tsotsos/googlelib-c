@@ -28,12 +28,15 @@
 #define DRIVE_H_
 #include "google.h"
 #include "dprint.h"
+#include <ctype.h>
 #define DRIVE_FILES "drive/v2/files"
 #define DRIVE_VERSION "v2"
 #define DRIVE_ABOUT "about"
 
-char * About ( char *token, char *includeSubscribed, long maxChangeIdCount,
-               long startChangeId );
+int urlencode(char *dest, const char *src);
+
+int DriveAbout (char **dest, char *token, char *includeSubscribed, long maxChangeIdCount,
+                    long startChangeId );
 
 #endif // DRIVE_H_
 
