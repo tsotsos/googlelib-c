@@ -29,27 +29,44 @@
  */
 #include "drive.h"
 
-char * DriveAbout ( char *token, char *includeSubscribed, long maxChangeIdCount,
-                    long startChangeId )
+int urlencode ( char *dest, const char *src )
 {
-        char *s;
-
-        char * format = NULL;
-        format = "GET https://%s/drive/%s/%s?access_token=%s";
-        a_sprintf ( &s, format,GOOGLEAPI_HOST,DRIVE_VERSION,DRIVE_ABOUT,token );
-        if ( ( includeSubscribed != NULL ) ) {
-                s = concat ( s,"&includeSubscribed=%s" );
-                a_sprintf ( &s, s,includeSubscribed );
+        char *d;
+        int i;
+        for ( i=0, d=dest; src[i]; i++ ) {
+                if ( isalnum ( src[i] ) ) * ( d++ ) = src[i];
+                else {
+                        sprintf ( d, "%%%02X", src[i] );
+                        d += 3;
+                }
         }
-        if ( ( maxChangeIdCount >= 0 ) ) {
-                s = concat ( s,"&maxChangeIdCount=%lu" );
-                a_sprintf ( &s, s,maxChangeIdCount );
-        }
-        if ( ( startChangeId >= 0 ) ) {
-                s = concat ( s,"&startChangeId=%lu" );
-                a_sprintf ( &s, s,startChangeId );
-        }
-        return s;
+        *d = 0;
+        return d-dest;
 }
+int DriveAbout ( char **dest, char *token, char *includeSubscribed,
+                 long maxChangeIdCount,
+                 long startChangeId )
+{
+        char * s = NULL;
+        int length = 0;
+        length = a_sprintf ( &s, "GET https://%s/drive/%s/%s?access_token=%s",
+                             GOOGLEAPI_HOST,DRIVE_VERSION,DRIVE_ABOUT,token );
+        if ( ( includeSubscribed != NULL ) )
+                length = a_sprintf ( &s, concat ( s,"&includeSubscribed=%s" ),
+                                     includeSubscribed );
+        if ( ( maxChangeIdCount >= 0 ) )
+                length = a_sprintf ( &s, concat ( s,"&maxChangeIdCount=%lu" ),
+                                     maxChangeIdCount );
+        if ( ( startChangeId >= 0 ) )
+                length = a_sprintf ( &s, concat ( s,"&startChangeId=%lu" ),startChangeId );
+        if ( ( dest != NULL ) ) {
+                *dest=s;
+        }
+        return length;
+}
+
+
+
+
 
 
