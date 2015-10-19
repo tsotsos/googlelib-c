@@ -32,6 +32,7 @@
 #define DRIVE_FILES "drive/v2/files"
 #define DRIVE_VERSION "v2"
 #define DRIVE_ABOUT "about"
+#define d_free(p) { free(p); p = 0; }
 
 int urlencode(char *dest, const char *src);
 
