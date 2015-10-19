@@ -37,8 +37,8 @@ int a_sprintf ( char **str, char* fmt, ... )
         }
         va_end ( argp );
 
-        *str = malloc ( len+1 );
-        if ( !str )
+        *str = (char * ) malloc ( len+1 );
+         if ( !str )
                 return -1;
         va_start ( argp, fmt );
         vsnprintf ( *str, len+1, fmt, argp );
