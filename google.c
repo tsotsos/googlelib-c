@@ -560,7 +560,7 @@ Json * parseResponse ( char * response )
                                         json = realloc ( json, ( ( i + 1 ) * sizeof ( Json ) ) );
                                 json[i].name = key;
                                 json[i].value = val;
-                                json[0].length = i; //'array' size storing
+                                json[0].length = i; //array size storing
                                 i++;
                         }
                         if ( nextLine ) *nextLine = '\n';

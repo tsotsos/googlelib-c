@@ -45,4 +45,3 @@ int a_sprintf ( char **str, char* fmt, ... )
         va_end ( argp );
         return len;
 }
-

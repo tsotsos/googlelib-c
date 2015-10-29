@@ -47,26 +47,53 @@ int DriveAbout ( char **dest, char *token, char *includeSubscribed,
                  long maxChangeIdCount,
                  long startChangeId )
 {
-        char * s = NULL;
+        char * result = NULL;
+        char * temp = NULL;
         int length = 0;
-        length = a_sprintf ( &s, "GET https://%s/drive/%s/%s?access_token=%s",
-                             GOOGLEAPI_HOST,DRIVE_VERSION,DRIVE_ABOUT,token );
-        if ( ( includeSubscribed != NULL ) )
-                length = a_sprintf ( &s, concat ( s,"&includeSubscribed=%s" ),
-                                     includeSubscribed );
-        if ( ( maxChangeIdCount >= 0 ) )
-                length = a_sprintf ( &s, concat ( s,"&maxChangeIdCount=%lu" ),
-                                     maxChangeIdCount );
-        if ( ( startChangeId >= 0 ) )
-                length = a_sprintf ( &s, concat ( s,"&startChangeId=%lu" ),startChangeId );
-        if ( ( dest != NULL ) ) {
-                *dest=s;
+        if ( ( includeSubscribed != NULL ) ) {
+                char *s = NULL;
+                length = a_sprintf ( &s,"&includeSubscribed=%s",includeSubscribed );
+                if ( !temp ) {
+                        temp = malloc ( strlen ( s ) + 1 );
+                        strncpy ( temp, s, strlen ( s ) + 1 );
+                } else {
+                        temp = realloc ( temp, strlen ( temp ) + strlen ( s ) + 1 );
+                        strncat ( temp, s, strlen ( s ) + 1 );
+                }
+                free ( s );
         }
+        if ( ( maxChangeIdCount >= 0 ) ) {
+                char *s = NULL;
+                length = a_sprintf ( &s, "&maxChangeIdCount=%lu",maxChangeIdCount );
+                if ( !temp ) {
+                        temp = malloc ( strlen ( s ) + 1 );
+                        strncpy ( temp, s, strlen ( s ) + 1 );
+                } else {
+                        temp = realloc ( temp, strlen ( temp ) + strlen ( s ) + 1 );
+                        strncat ( temp, s, strlen ( s ) + 1 );
+                }
+                free ( s );
+        }
+        if ( ( startChangeId >= 0 ) ) {
+                char *s = NULL;
+                length =  a_sprintf ( &s, "&startChangeId=%lu",startChangeId );
+                if ( !temp ) {
+                        temp = malloc ( strlen ( s ) + 1 );
+                        strncpy ( temp, s, strlen ( s ) + 1 );
+                } else {
+                        temp = realloc ( temp, strlen ( temp ) + strlen ( s ) + 1 );
+                        strncat ( temp, s, strlen ( s ) + 1 );
+                }
+                free ( s );
+        }
+        if ( temp )
+                length = a_sprintf ( &result, "GET https://%s/drive/%s/%s?access_token=%s%s",
+                                     GOOGLEAPI_HOST,DRIVE_VERSION,DRIVE_ABOUT,token,temp );
+        else
+                length = a_sprintf ( &result, "GET https://%s/drive/%s/%s?access_token=%s",
+                                     GOOGLEAPI_HOST,DRIVE_VERSION,DRIVE_ABOUT,token );
+        *dest = result;
+        free ( temp );
         return length;
 }
-
-
-
-
-
 

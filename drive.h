@@ -38,7 +38,6 @@ int urlencode(char *dest, const char *src);
 
 int DriveAbout (char **dest, char *token, char *includeSubscribed, long maxChangeIdCount,
                     long startChangeId );
-
 #endif // DRIVE_H_
 
 

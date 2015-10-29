@@ -33,6 +33,7 @@
 int a_sprintf ( char **str, char* fmt, ... ) __attribute__ ( ( format ( printf,
                 2,3 ) ) );
 
+
 #endif // DPRINT_H_
 
 
